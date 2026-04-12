@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter_chat_core/flutter_chat_core.dart';
 
 /// Simple in-memory chat controller (no Hive dependency).

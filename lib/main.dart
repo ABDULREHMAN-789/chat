@@ -12,6 +12,7 @@ class ChatScrollChallenge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Chat Scroll Challenge',
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
