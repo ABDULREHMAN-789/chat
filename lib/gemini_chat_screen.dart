@@ -45,9 +45,15 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
   StreamSubscription? _currentStreamSubscription;
   String? _currentStreamId;
 
+  // Variable to track if user is at the bottom of the chat list
+  bool _isAtBottom = true;
+
   @override
   void initState() {
     super.initState();
+    // Scroll listener attach kar rahe hain
+    _scrollController.addListener(_scrollListener);
+
     _streamManager = GeminiStreamManager(
       chatController: _chatController,
       chunkAnimationDuration: _kChunkAnimationDuration,
@@ -64,9 +70,20 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
     _chatSession = _model.startChat();
   }
 
+  void _scrollListener() {
+    if (!_scrollController.hasClients) return;
+
+
+    final isNearBottom = _scrollController.position.pixels <= 50.0;
+    if (_isAtBottom != isNearBottom) {
+      _isAtBottom = isNearBottom;
+    }
+  }
+
   @override
   void dispose() {
     _currentStreamSubscription?.cancel();
+    _scrollController.removeListener(_scrollListener); // Listener remove kar rahe hain
     _streamManager.dispose();
     _chatController.dispose();
     _scrollController.dispose();
@@ -92,10 +109,10 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
   }
 
   void _handleStreamError(
-    String streamId,
-    dynamic error,
-    TextStreamMessage? streamMessage,
-  ) async {
+      String streamId,
+      dynamic error,
+      TextStreamMessage? streamMessage,
+      ) async {
     debugPrint('Generation error for $streamId: $error');
 
     if (streamMessage != null) {
@@ -128,46 +145,46 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
               );
             },
             imageMessageBuilder: (
-              context,
-              message,
-              index, {
-              required bool isSentByMe,
-              MessageGroupStatus? groupStatus,
-            }) =>
+                context,
+                message,
+                index, {
+                  required bool isSentByMe,
+                  MessageGroupStatus? groupStatus,
+                }) =>
                 FlyerChatImageMessage(
-              message: message,
-              index: index,
-              showTime: false,
-              showStatus: false,
-            ),
+                  message: message,
+                  index: index,
+                  showTime: false,
+                  showStatus: false,
+                ),
             composerBuilder: (context) => _Composer(
               isStreaming: _isStreaming,
               onStop: _stopCurrentStream,
             ),
             textMessageBuilder: (
-              context,
-              message,
-              index, {
-              required bool isSentByMe,
-              MessageGroupStatus? groupStatus,
-            }) =>
+                context,
+                message,
+                index, {
+                  required bool isSentByMe,
+                  MessageGroupStatus? groupStatus,
+                }) =>
                 FlyerChatTextMessage(
-              message: message,
-              index: index,
-              showTime: false,
-              showStatus: false,
-              receivedBackgroundColor: Colors.transparent,
-              padding: message.authorId == _agent.id
-                  ? EdgeInsets.zero
-                  : const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            ),
+                  message: message,
+                  index: index,
+                  showTime: false,
+                  showStatus: false,
+                  receivedBackgroundColor: Colors.transparent,
+                  padding: message.authorId == _agent.id
+                      ? EdgeInsets.zero
+                      : const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
             textStreamMessageBuilder: (
-              context,
-              message,
-              index, {
-              required bool isSentByMe,
-              MessageGroupStatus? groupStatus,
-            }) {
+                context,
+                message,
+                index, {
+                  required bool isSentByMe,
+                  MessageGroupStatus? groupStatus,
+                }) {
               final streamState = context
                   .watch<GeminiStreamManager>()
                   .getState(message.streamId);
@@ -204,6 +221,15 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
   }
 
   void _handleMessageSend(String text) async {
+
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+
     await _chatController.insertMessage(
       TextMessage(
         id: _uuid.v4(),
@@ -266,7 +292,7 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
       final response = _chatSession.sendMessageStream(content);
 
       _currentStreamSubscription = response.listen(
-        (chunk) async {
+            (chunk) async {
           if (chunk.text != null) {
             final textChunk = chunk.text!;
             if (textChunk.isEmpty) return;
@@ -278,6 +304,15 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
             if (streamMessage == null) return;
 
             _streamManager.addChunk(streamId, textChunk);
+
+
+            if (_isAtBottom && _scrollController.hasClients) {
+              _scrollController.animateTo(
+                0.0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
+            }
           }
         },
         onDone: () async {
@@ -358,11 +393,11 @@ class _ComposerState extends State<_Composer> {
     final bottomSafeArea = MediaQuery.of(context).padding.bottom;
     final onAttachmentTap = context.read<OnAttachmentTapCallback?>();
     final theme = context.select(
-      (ChatTheme t) => (
-        bodyMedium: t.typography.bodyMedium,
-        onSurface: t.colors.onSurface,
-        surfaceContainerHigh: t.colors.surfaceContainerHigh,
-        surfaceContainerLow: t.colors.surfaceContainerLow,
+          (ChatTheme t) => (
+      bodyMedium: t.typography.bodyMedium,
+      onSurface: t.colors.onSurface,
+      surfaceContainerHigh: t.colors.surfaceContainerHigh,
+      surfaceContainerLow: t.colors.surfaceContainerLow,
       ),
     );
 
@@ -401,7 +436,7 @@ class _ComposerState extends State<_Composer> {
                           border: const OutlineInputBorder(
                             borderSide: BorderSide.none,
                             borderRadius:
-                                BorderRadius.all(Radius.circular(24)),
+                            BorderRadius.all(Radius.circular(24)),
                           ),
                           filled: true,
                           fillColor: theme.surfaceContainerHigh
