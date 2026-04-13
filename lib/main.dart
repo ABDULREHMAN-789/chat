@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'gemini_chat_screen.dart';
 
 void main() {

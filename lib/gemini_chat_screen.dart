@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cross_cache/cross_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,9 +43,9 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
   bool _isStreaming = false;
   StreamSubscription? _currentStreamSubscription;
   String? _currentStreamId;
-
+  
   // Variable to track if user is at the bottom of the chat list
-  bool _isAtBottom = true;
+  bool _isAtBottom = true; 
 
   @override
   void initState() {
@@ -70,10 +69,11 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
     _chatSession = _model.startChat();
   }
 
+  // Scroll position ko check karne wala function
   void _scrollListener() {
     if (!_scrollController.hasClients) return;
-
-
+    
+    // Agar pixels 50 ya us se kam hain toh iska matlab user bottom par hai
     final isNearBottom = _scrollController.position.pixels <= 50.0;
     if (_isAtBottom != isNearBottom) {
       _isAtBottom = isNearBottom;
@@ -109,10 +109,10 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
   }
 
   void _handleStreamError(
-      String streamId,
-      dynamic error,
-      TextStreamMessage? streamMessage,
-      ) async {
+    String streamId,
+    dynamic error,
+    TextStreamMessage? streamMessage,
+  ) async {
     debugPrint('Generation error for $streamId: $error');
 
     if (streamMessage != null) {
@@ -145,46 +145,46 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
               );
             },
             imageMessageBuilder: (
-                context,
-                message,
-                index, {
-                  required bool isSentByMe,
-                  MessageGroupStatus? groupStatus,
-                }) =>
+              context,
+              message,
+              index, {
+              required bool isSentByMe,
+              MessageGroupStatus? groupStatus,
+            }) =>
                 FlyerChatImageMessage(
-                  message: message,
-                  index: index,
-                  showTime: false,
-                  showStatus: false,
-                ),
+              message: message,
+              index: index,
+              showTime: false,
+              showStatus: false,
+            ),
             composerBuilder: (context) => _Composer(
               isStreaming: _isStreaming,
               onStop: _stopCurrentStream,
             ),
             textMessageBuilder: (
-                context,
-                message,
-                index, {
-                  required bool isSentByMe,
-                  MessageGroupStatus? groupStatus,
-                }) =>
+              context,
+              message,
+              index, {
+              required bool isSentByMe,
+              MessageGroupStatus? groupStatus,
+            }) =>
                 FlyerChatTextMessage(
-                  message: message,
-                  index: index,
-                  showTime: false,
-                  showStatus: false,
-                  receivedBackgroundColor: Colors.transparent,
-                  padding: message.authorId == _agent.id
-                      ? EdgeInsets.zero
-                      : const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                ),
+              message: message,
+              index: index,
+              showTime: false,
+              showStatus: false,
+              receivedBackgroundColor: Colors.transparent,
+              padding: message.authorId == _agent.id
+                  ? EdgeInsets.zero
+                  : const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
             textStreamMessageBuilder: (
-                context,
-                message,
-                index, {
-                  required bool isSentByMe,
-                  MessageGroupStatus? groupStatus,
-                }) {
+              context,
+              message,
+              index, {
+              required bool isSentByMe,
+              MessageGroupStatus? groupStatus,
+            }) {
               final streamState = context
                   .watch<GeminiStreamManager>()
                   .getState(message.streamId);
@@ -221,7 +221,7 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
   }
 
   void _handleMessageSend(String text) async {
-
+    // Jab user naya message send kare, toh furan list ke bottom par scroll kar dein
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         0.0,
@@ -292,7 +292,7 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
       final response = _chatSession.sendMessageStream(content);
 
       _currentStreamSubscription = response.listen(
-            (chunk) async {
+        (chunk) async {
           if (chunk.text != null) {
             final textChunk = chunk.text!;
             if (textChunk.isEmpty) return;
@@ -305,7 +305,7 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
 
             _streamManager.addChunk(streamId, textChunk);
 
-
+            // Auto-scroll logic: Agar user bottom par hai toh scroll kare
             if (_isAtBottom && _scrollController.hasClients) {
               _scrollController.animateTo(
                 0.0,
@@ -393,11 +393,11 @@ class _ComposerState extends State<_Composer> {
     final bottomSafeArea = MediaQuery.of(context).padding.bottom;
     final onAttachmentTap = context.read<OnAttachmentTapCallback?>();
     final theme = context.select(
-          (ChatTheme t) => (
-      bodyMedium: t.typography.bodyMedium,
-      onSurface: t.colors.onSurface,
-      surfaceContainerHigh: t.colors.surfaceContainerHigh,
-      surfaceContainerLow: t.colors.surfaceContainerLow,
+      (ChatTheme t) => (
+        bodyMedium: t.typography.bodyMedium,
+        onSurface: t.colors.onSurface,
+        surfaceContainerHigh: t.colors.surfaceContainerHigh,
+        surfaceContainerLow: t.colors.surfaceContainerLow,
       ),
     );
 
@@ -436,7 +436,7 @@ class _ComposerState extends State<_Composer> {
                           border: const OutlineInputBorder(
                             borderSide: BorderSide.none,
                             borderRadius:
-                            BorderRadius.all(Radius.circular(24)),
+                                BorderRadius.all(Radius.circular(24)),
                           ),
                           filled: true,
                           fillColor: theme.surfaceContainerHigh
