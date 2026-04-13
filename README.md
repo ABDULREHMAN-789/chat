@@ -1,55 +1,28 @@
-# Chat Auto-Scroll Challenge
+# Chat Auto-Scroll Implementation (Gemini AI)
 
-## Setup
+## Overview
+This repository contains an optimized implementation of a Gemini-powered Flutter chat application. The primary focus of this project was to resolve critical User Experience (UX) issues related to chat scrolling, ensuring a smooth, intuitive, and natural conversational interface.
 
-1. Get a free Gemini API key from [ai.google.dev](https://ai.google.dev)
-2. Run `flutter pub get`
-3. Run `flutter run` (web, macOS, or any platform)
-4. Enter your API key and start chatting
+## UX Issues Identified & Resolved
 
-## Your Task
+1. **Basic Auto-Scroll:** The chat screen initially failed to automatically scroll down when a long AI response was streaming. This was fixed by implementing custom logic using `ScrollController.animateTo()`, which smoothly pushes the view to the bottom as new text chunks arrive.
+2. **Pause on Manual Scroll:** Previously, if a user scrolled up to read past messages while a response was actively streaming, the auto-scroll would abruptly pull them back down. A scroll listener and an `_isAtBottom` state variable were introduced to seamlessly pause the auto-scroll during manual user navigation.
+3. **Send While Scrolled Up:** Sending a new message while scrolled up did not snap the view back to the latest message. Now, invoking `_scrollController.animateTo(0.0)` immediately forces the chat list to scroll to the bottom the moment a new message is dispatched.
+4. **Resume Auto-Scroll After Scroll Down:** Auto-scroll would fail to resume if the user scrolled back down during an active stream. The scroll listener now accurately detects when the user returns to the bottom (`_isAtBottom == true`) and smoothly reactivates the auto-scroll behavior.
+5. **Bonus Fix (Android Network Configuration):** The application was initially failing to execute API calls on physical Android devices. This was resolved by explicitly declaring the `<uses-permission android:name="android.permission.INTERNET"/>` requirement in the primary `AndroidManifest.xml`.
 
-This app has scroll UX issues. Compare it against the reference implementation and fix them.
+## Project Links
 
-**Reference:** https://iman-admin.github.io/chat-scroll-demo/
+- **Repository / Deployed Code:** [View Project](https://github.com/ABDULREHMAN-789/chat)
+- **Comprehensive Demo Recording:** [Watch Video Demonstration](https://drive.google.com/file/d/1VUXdKsXqrn0BvrtZ9aLUdGlKvlOaVTig/view?usp=sharing) 
+*(Note: This single video covers all testing scenarios including basic auto-scroll, manual pause, sending while scrolled up, and resuming auto-scroll).*
 
-Test these scenarios in the reference demo before you start coding. Start by sending a message that produces a long response to fill the screen (e.g. _"Write a detailed essay about the history of the internet"_). If the response is too short, send another one.
+## How to Run Locally
 
-1. Send a message and let the response stream in.
-2. While a response is streaming, scroll up manually.
-3. While scrolled up, send a new message.
-4. While a response is streaming, scroll back down to the bottom.
+If you want to test this project on your local machine, follow these steps:
 
-Your solution will be scored primarily on how closely it matches the reference. You are free to use any AI tools you'd like.
-
-## How to Submit
-
-1. Clone this repo into a **private** repository on your own GitHub account.
-2. Implement your solution.
-3. Deploy your solution to the web.
-4. Update this README with:
-   - The UX issues you identified and fixed.
-   - Your deployed URL.
-   - Include screen recordings for all five scenarios and the deployed URL below.
-5. Add **IMan-admin** as a collaborator to your private repo.
-6. Send us the link to your repo.
-
-
-### Deployed URL
-
-[Live Demo](https://your-deployed-url.com)
-
-### Screen Recordings
-
-- **Scenario 1 (Basic Auto-Scroll):** [Watch Recording](https://your-recording/scenario1)
-- **Scenario 2 (Pause on Manual Scroll):** [Watch Recording](https://your-hrecording/scenario2)
-- **Scenario 3 (Send While Scrolled Up):** [Watch Recording](https://your-recording/scenario3)
-- **Scenario 4 (Resume Auto-Scroll After Scroll Down):** [Watch Recording](https://your-recording/scenario4)
- 
-
-## Evaluation Criteria
-
-- Does each scenario work correctly in isolation?
-- Do all four scenarios work together without regressions?
-- Does the behavior match the reference demo?
-- Is the code clean, testable, and well-separated?
+1. Clone this repository.
+2. Obtain a free Gemini API key from [ai.google.dev](https://ai.google.dev).
+3. Run `flutter pub get` to install all required dependencies.
+4. Run `flutter run` on your preferred platform (Web, Android, iOS, or macOS).
+5. Enter your API key on the welcome screen to start chatting.
